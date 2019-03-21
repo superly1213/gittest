@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script type="text/javascript" src="./qwebchannel.js"></script>
+		<script charset="utf-8" src="http://map.qq.com/api/js?v=2.exp"></script>
+        <script type="text/javascript">
+        
+		// 输出信息
+        function output(message)
+        {
+            var output = document.getElementById("output");
+            output.innerHTML = output.innerHTML + message + "\n";
+        }
+		
+		// 启动加载函数
+         window.onload = function() 
+		 {
+            output("安装 QWebChannel.");
+			var interactObj;
+            new QWebChannel(qt.webChannelTransport, function(channel) 
+			{
+                // 获取Qt类交互对象
+                interactObj = channel.objects.interactObj;
+				// 按钮点击事件
+                document.getElementById("send").onclick = function() 
+				{
+                    var input = document.getElementById("input");
+                    if (!input.value) {
+                        return;
+                    }
+					// 调用Qt类公有函数
+                    interactObj.recvStringSlot(input.value);
+                    input.value = "";
+                }
+				
+				// 链接Qt类信号函数
+                interactObj.sendStringSignal.connect(function(str) 
+				{
+                    output("Received string: " + str);
+                });
+				
+				// 调用Qt类公有函数
+                interactObj.recvStringSlot("Client connected, 准备发送、接收数据!");
+            });
+			
+			var center = new qq.maps.LatLng(39.916527,116.397128);
+			//var center = new qq.maps.LatLng(3.08,36.42);
+			map = new qq.maps.Map(document.getElementById('container'),{
+																		center: center,
+																		zoom: 13});
+	 
+			//获取城市列表接口设置中心点
+			citylocation = new qq.maps.CityService
+			({
+				complete : function(result){
+				map.setCenter(result.detail.latLng);
+			
+				marker = new qq.maps.Marker({
+				position: result.detail.latLng,
+				draggable: true,
+				map: map,});
+			
+			 //设置Marker停止拖动事件
+				qq.maps.event.addListener(marker, 'dragend', function() {
+					//info.open();
+					//info.setContent('<div style="text-align:center;white-space:nowrap;' +
+					//  'margin:10px;">拖动标记</div>');
+					//getPosition()  返回Marker的位置
+					//info.setPosition(marker.getPosition());
+					output("Received string: " + marker.getPosition());
+					interactObj.recvStringSlot("Received string: " + marker.getPosition());
+					});
+				}
+			});
+			
+			//调用searchLocalCity();方法    根据用户IP查询城市信息。
+			citylocation.searchLocalCity();
+         }
+
+            //END SETUP
+        </script>
+        <style type="text/css">
+            html {
+                height: 100%;
+                width: 100%;
+            }
+            #input {
+                width: 300px;
+                margin: 0 10px 0 0;
+            }
+            #send {
+                width: 90px;
+                margin: 0;
+            }
+            #output {
+                width: 400px;
+                height: 300px;
+            }
+			#container
+			{
+				min-width:600px;
+				min-height:767px;
+			}
+			#city
+			{
+				height:30px;
+				display:none;
+			}
+        </style>
+    </head>
+    <body>
+        <textarea id="output"></textarea><br />
+        <input id="input" />
+		<input type="submit" id="send" value="发送文本" onclick="javascript:click();" />
+		<span id="city"></span>
+		<div id="container"></div>
+    </body>
+</html>

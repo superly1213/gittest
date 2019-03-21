@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script type="text/javascript" src="./qwebchannel.js"></script>
+        <script type="text/javascript">
+        
+		// 输出信息
+        function output(message)
+        {
+            var output = document.getElementById("output");
+            output.innerHTML = output.innerHTML + message + "\n";
+        }
+		
+		// 启动加载函数
+         window.onload = function() 
+		 {
+            output("安装 QWebChannel.");
+			var qt_html_connecter;
+            new QWebChannel(qt.webChannelTransport, function(channel) 
+			{
+                // 获取Qt类交互对象
+                qt_html_connecter = channel.objects.qt_html_connecter;
+				// 按钮点击事件
+                document.getElementById("send").onclick = function() 
+				{
+                    var input = document.getElementById("input");
+                    if (!input.value) {
+                        return;
+                    }
+					// 调用Qt类公有函数
+                    qt_html_connecter.recvStringFromHtmlSlot(input.value);
+                    input.value = "";
+                }
+				
+				// 链接Qt类信号函数
+                qt_html_connecter.sendStringToHtmlSignal.connect(function(str) 
+				{
+                    output("Received string: " + str);
+                });
+				
+				// 调用Qt类公有函数
+                qt_html_connecter.recvStringFromHtmlSlot("Client connected, 准备发送、接收数据!");
+            });
+         }
+
+            //END SETUP
+        </script>
+        <style type="text/css">
+            html {
+                height: 100%;
+                width: 100%;
+            }
+            #input {
+                width: 300px;
+                margin: 0 10px 0 0;
+            }
+            #send {
+                width: 90px;
+                margin: 0;
+            }
+            #output {
+                width: 400px;
+                height: 300px;
+            }
+			#container
+			{
+				min-width:600px;
+				min-height:767px;
+			}
+        </style>
+    </head>
+    <body>
+        <textarea id="output"></textarea><br />
+        <input id="input" />
+		<input type="submit" id="send" value="发送文本" onclick="javascript:click();" />
+		<div id="container"></div>
+    </body>
+</html>
