@@ -3,7 +3,7 @@
 #include <QTextCodec>
 #include "CXmtjPage.h"
 #include "mywindow.h"
-//github test add modify
+//github 
 int main(int argc, char *argv[])
 {
 	
